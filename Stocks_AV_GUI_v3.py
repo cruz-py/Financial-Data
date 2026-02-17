@@ -29,7 +29,7 @@ MAX_RETRIES = 3
 CACHE_TTL_HOURS = 24
 
 # ==============================
-# App directory (fixed)
+# App directory
 # ==============================
 def get_app_directory():
     if getattr(sys, 'frozen', False):
@@ -316,17 +316,33 @@ def test_alpha_vantage_key(api_key):
 def open_settings_window():
     win = ctk.CTkToplevel(root)
     win.title("Preferences")
-    win.geometry("420x300")
+    win_width = 420
+    win_height = 300
+
+    # Center the window relative to root
+    root.update_idletasks()  # ensure root has accurate size
+    root_x = root.winfo_x()
+    root_y = root.winfo_y()
+    root_width = root.winfo_width()
+    root_height = root.winfo_height()
+
+    x = root_x + (root_width // 2) - (win_width // 2)
+    y = root_y + (root_height // 2) - (win_height // 2)
+
+    win.geometry(f"{win_width}x{win_height}+{x}+{y}")
     win.transient(root)
     win.grab_set()
 
+    # Widgets
     ctk.CTkLabel(win, text="Alpha Vantage API Key:", font=("Segoe UI",12,"bold")).pack(anchor="w", padx=10, pady=6)
     api_entry = ctk.CTkEntry(win, width=400)
     api_entry.pack(padx=10)
     api_entry.insert(0, settings.get("api_key",""))
 
-    def open_alpha_vantage(): webbrowser.open("https://www.alphavantage.co/support/#api-key")
-    link = ctk.CTkLabel(win,text="Get a free Alpha Vantage API key", text_color="green", justify="center", cursor="hand2")
+    def open_alpha_vantage(): 
+        webbrowser.open("https://www.alphavantage.co/support/#api-key")
+
+    link = ctk.CTkLabel(win, text="Get a free Alpha Vantage API key", text_color="green", justify="center", cursor="hand2")
     link.pack(anchor="w", padx=10, pady=(4,8))
     link.bind("<Button-1>", lambda e: open_alpha_vantage())
 
@@ -334,11 +350,14 @@ def open_settings_window():
     status_label.pack(anchor="w", padx=10, pady=6)
 
     def test_key():
-        ok,msg = test_alpha_vantage_key(api_entry.get().strip())
+        ok, msg = test_alpha_vantage_key(api_entry.get().strip())
         status_label.configure(text=msg, text_color="green" if ok else "red")
         settings["api_key_validated"] = ok
         settings["api_key"] = api_entry.get().strip()
         save_settings(settings)
+        
+        # Update Run Analysis button state immediately
+        run_button.configure(state="normal" if ok else "disabled")
 
     ctk.CTkButton(win, text="Save & Test API Key", command=test_key).pack(anchor="w", padx=10)
 
@@ -347,13 +366,35 @@ def open_settings_window():
 # ==============================
 
 def show_about():
-    messagebox.showinfo(
-        "About",
-        f"{APP_NAME} v{APP_VERSION}\n\n"
-        f"Developed & crafted by {DEVELOPER}\n"
-        f"© {YEAR}\n\n"
-        "Built with Python, Tkinter & Financial APIs."
+    about_win = ctk.CTkToplevel(root)
+    about_win.title("About")
+    about_win.geometry("400x250")
+    about_win.transient(root)
+    about_win.grab_set()
+
+    ctk.CTkLabel(
+        about_win,
+        text=f"{APP_NAME} v{APP_VERSION}\n\n"
+             f"Developed & crafted by {DEVELOPER}\n"
+             f"© {YEAR}\n\n"
+             "Built with Python, Tkinter & Financial APIs.",
+        font=("Segoe UI", 12),
+        justify="center"
+    ).pack(pady=(20,10), padx=20)
+
+    # Donation / support link
+    link = ctk.CTkLabel(
+        about_win,
+        text="Support development: PayPal / Donate",
+        font=("Segoe UI", 12, "underline"),
+        text_color="green",
+        cursor="hand2"
     )
+    link.pack(pady=10)
+    link.bind("<Button-1>", lambda e: webbrowser.open("https://paypal.me/ruicruz27"))
+
+    # Close button
+    ctk.CTkButton(about_win, text="Close", command=about_win.destroy).pack(pady=10)
 
 # ==============================
 # GUI
@@ -367,19 +408,25 @@ root.geometry("900x650")
 root.minsize(750,550)
 
 # Menu
+# Menu variable
+menu_var = ctk.StringVar(value="Menu")
+
+# Menu handler
 def handle_menu(choice):
     if choice == "Settings":
         open_settings_window()
     elif choice == "About":
         show_about()
+    # Reset menu display back to "Menu"
+    menu_var.set("Menu")
 
+# Create the menu
 menubar = ctk.CTkOptionMenu(
     root,
+    variable=menu_var,   # link the StringVar
     values=["Settings", "About"],
     command=handle_menu
 )
-
-menubar.set("Menu")
 menubar.pack(anchor="ne", pady=5, padx=10)
 
 # Main frame

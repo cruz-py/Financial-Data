@@ -66,6 +66,11 @@ Developed and crafter by Cruz-Py
 
 This tool is designed for personal use or research purposes. Contributions and feedback are welcome!
 
+### Support / Donate
+If you find this tool useful, consider supporting its development:
+
+[Donate via PayPal](https://www.paypal.me/ruicruz27)
+
 ---
 
 ## License
