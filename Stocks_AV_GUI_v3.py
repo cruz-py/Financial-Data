@@ -17,7 +17,7 @@ from pathlib import Path
 # ==============================
 # Developer info
 # ==============================
-APP_NAME = "Financial Data Extractor"
+APP_NAME = "AlphaFin"
 APP_VERSION = "3.3"
 DEVELOPER = "Cruz-Py"
 YEAR = "2026"
@@ -526,7 +526,7 @@ class FinancialDataApp:
         # Header
         ctk.CTkLabel(
             self.main_frame,
-            text="Financial Data Viewer",
+            text="AlphaFin - Financial Data Extractor",
             font=("Segoe UI", 20, "bold")
         ).grid(row=0, column=0, columnspan=2, pady=(0, 20))
         
